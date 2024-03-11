@@ -239,6 +239,10 @@ class Ground():
             self.rect1.left = self.rect.right
 
 
+
+
+
+
 class Cloud(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self, self.containers)
