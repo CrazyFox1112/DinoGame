@@ -1,7 +1,7 @@
 import os
 import random
 from pygame import *
-from settings import  *
+from settings import *
 
 
 def load_image(
@@ -9,7 +9,25 @@ def load_image(
         sx=-1,
         sy=-1,
         colorkey=None,
-):
+) -> pygame.Surface:
+    """
+    Загружает изображение из каталога 'resources'.
+
+    Аргументы:
+        name (str): Имя файла изображения для загрузки.
+        sx (int, опционально): Желаемая ширина загруженного изображения. По умолчанию -1, что означает без изменения размера.
+        sy (int, опционально): Желаемая высота загруженного изображения. По умолчанию -1, что означает без изменения размера.
+        colorkey (Optional[Union[Tuple[int, int, int], int]], опционально): Если указано, устанавливает цветовой ключ изображения,
+            чтобы обеспечить прозрачность. Если это целое число, оно интерпретируется как цвет, который должен стать прозрачным.
+            Если это кортеж (r, g, b), этот цвет будет сделан прозрачным. По умолчанию None, что означает отсутствие прозрачности.
+
+    Возвращает:
+        pygame.Surface: Загруженное изображение в виде объекта pygame Surface.
+
+    Примечание:
+        Эта функция предполагает, что изображения находятся в каталоге 'resources' относительно местоположения скрипта.
+        Если colorkey установлен в -1, функция автоматически определяет цветовой ключ из верхнего левого пикселя загруженного изображения.
+        """
     fullname = os.path.join('resources', name)
     img = pygame.image.load(fullname)
     img = img.convert()
@@ -33,6 +51,22 @@ def load_sprite_sheet(
         scy=-1,
         c_key=None,
 ):
+    """
+    Загружает спрайтовый лист изображения из каталога 'resources'.
+
+    Аргументы:
+        s_name (str): Имя файла спрайтового листа для загрузки.
+        namex (int): Количество спрайтов по горизонтали.
+        namey (int): Количество спрайтов по вертикали.
+        scx (int, опционально): Желаемая ширина спрайта. По умолчанию -1, что означает без изменения размера.
+        scy (int, опционально): Желаемая высота спрайта. По умолчанию -1, что означает без изменения размера.
+        c_key (Optional[Union[Tuple[int, int, int], int]], опционально): Если указан, устанавливает цветовой ключ изображения,
+            чтобы обеспечить прозрачность. Если это целое число, оно интерпретируется как цвет, который должен стать прозрачным.
+            Если это кортеж (r, g, b), этот цвет будет сделан прозрачным. По умолчанию None, что означает отсутствие прозрачности.
+
+    Возвращает:
+        Tuple[List[pygame.Surface], pygame.Rect]: Список спрайтов в виде объектов pygame Surface и прямоугольник, охватывающий один из спрайтов.
+    """
     fullname = os.path.join('resources', s_name)
     sh = pygame.image.load(fullname)
     sh = sh.convert()
@@ -69,6 +103,17 @@ def load_sprite_sheet(
 # ! это функция принимает кол-во спрайтов и местоположение(по умолчанию -1.-1) можно сделать прозрачность
 
 def gameover_display_message(rbtn_image, gmo_image):
+    """
+        Отображает сообщение о завершении игры на экране.
+
+        Аргументы:
+            rbtn_image (pygame.Surface): Изображение кнопки "Повторить".
+            gmo_image (pygame.Surface): Изображение сообщения о завершении игры.
+
+        Примечание:
+            Изображение кнопки "Повторить" и сообщения о завершении игры должны быть предварительно загружены.
+
+        """
     rbtn_rect = rbtn_image.get_rect()
 
     # &get_react() дает возможность изменять картинку
@@ -86,6 +131,19 @@ def gameover_display_message(rbtn_image, gmo_image):
 # & blit build image
 
 def extractDigits(num):
+    """
+       Извлекает цифры из числа и возвращает их в виде списка.
+
+       Аргументы:
+           num (int): Число, из которого необходимо извлечь цифры.
+
+       Возвращает:
+           List[int]: Список цифр, извлеченных из числа. Если число меньше 0, возвращает пустой список.
+
+       Пример:
+           extractDigits(12345) -> [1, 2, 3, 4, 5]
+           extractDigits(7) -> [0, 0, 0, 0, 7]
+       """
     if num > -1:
         d = []
         i = 0
@@ -101,7 +159,34 @@ def extractDigits(num):
 
 
 class Dino():
-    def __init__(self, sx=-1, sy=-1):
+    """
+    Класс, представляющий персонажа динозавра в игре.
+
+    Атрибуты:
+        imgs (List[pygame.Surface]): Список изображений для анимации бега динозавра.
+        rect (pygame.Rect): Прямоугольник, ограничивающий изображение динозавра.
+        imgs1 (List[pygame.Surface]): Список изображений для анимации удара динозавра.
+        rect1 (pygame.Rect): Прямоугольник, ограничивающий изображение динозавра при ударе.
+        score (int): Текущий счет игрока.
+        jumping (bool): Флаг, указывающий, выполняется ли прыжок.
+        dead (bool): Флаг, указывающий, умер ли персонаж.
+        ducking (bool): Флаг, указывающий, находится ли персонаж в положении "присесть".
+        blinking (bool): Флаг, указывающий, мигает ли персонаж.
+        movement (List[int]): Список с компонентами движения динозавра.
+        jumpSpeed (float): Скорость прыжка динозавра.
+        stand_position_width (int): Ширина прямоугольника при стоящем положении динозавра.
+        duck_position_width (int): Ширина прямоугольника при положении "присесть" динозавра.
+        index (int): Индекс текущего изображения в анимации.
+        counter (int): Счетчик кадров для анимации и других событий.
+    """
+    def __init__(self, sx: int = -1, sy: int = -1):
+        """
+        Инициализация объекта динозавра.
+
+        Аргументы:
+            sx (int, опционально): Желаемая ширина спрайта динозавра. По умолчанию -1, что означает без изменения размера.
+            sy (int, опционально): Желаемая высота спрайта динозавра. По умолчанию -1, что означает без изменения размера.
+        """
         self.imgs, self.rect = load_sprite_sheet('dino.png', 5, 1, sx, sy, -1)
         self.imgs1, self.rect1 = load_sprite_sheet('dino_ducking.png', 2, 1, 59, sy, -1)
         self.rect.bottom = int(0.98 * height_screen)
@@ -121,14 +206,17 @@ class Dino():
         self.duck_position_width = self.rect1.width
 
     def draw(self):
+        """Отображает изображение динозавра на экране."""
         screen_layout_display.blit(self.image, self.rect)
 
     def checkbounds(self):
+        """Проверяет, находится ли динозавр в пределах экрана, и корректирует его положение при необходимости."""
         if self.rect.bottom > int(0.98 * height_screen):
             self.rect.bottom = int(0.98 * height_screen)
             self.jumping = False
 
     def update(self):
+        """Обновляет состояние динозавра на основе текущего счетчика кадров."""
         if self.jumping:
             self.movement[1] = self.movement[1] + gravity
 
@@ -167,12 +255,29 @@ class Dino():
             if self.score % 100 == 0 and self.score != 0:
                 if pygame.mixer.get_init() != None:
                     checkPoint_sound.play()
-        # ? начало игры
         self.counter = (self.counter + 1)
 
 
+
 class Cactus(pygame.sprite.Sprite):
-    def __init__(self, speed=5, sx=-1, sy=-1):
+    """
+    Класс, представляющий кактус в игре.
+
+    Атрибуты:
+        speed (int): Скорость движения кактуса по горизонтали.
+        imgs (List[pygame.Surface]): Список изображений для анимации движения кактуса.
+        rect (pygame.Rect): Прямоугольник, ограничивающий изображение кактуса.
+        movement (List[int]): Список с компонентами движения кактуса.
+    """
+    def __init__(self, speed: int = 5, sx: int = -1, sy: int = -1):
+        """
+        Инициализация объекта кактуса.
+
+        Аргументы:
+            speed (int, опционально): Скорость движения кактуса по горизонтали. По умолчанию 5.
+            sx (int, опционально): Желаемая ширина спрайта кактуса. По умолчанию -1, что означает без изменения размера.
+            sy (int, опционально): Желаемая высота спрайта кактуса. По умолчанию -1, что означает без изменения размера.
+        """
         pygame.sprite.Sprite.__init__(self, self.containers)
         self.imgs, self.rect = load_sprite_sheet('cactus-small.png', 3, 1, sx, sy, -1)
         self.rect.bottom = int(0.98 * height_screen)
@@ -181,9 +286,11 @@ class Cactus(pygame.sprite.Sprite):
         self.movement = [-1 * speed, 0]
 
     def draw(self):
+        """Отображает изображение кактуса на экране."""
         screen_layout_display.blit(self.image, self.rect)
 
     def update(self):
+        """Обновляет состояние кактуса."""
         self.rect = self.rect.move(self.movement)
 
         if self.rect.right < 0:
@@ -191,7 +298,27 @@ class Cactus(pygame.sprite.Sprite):
 
 
 class birds(pygame.sprite.Sprite):
-    def __init__(self, speed=5, sx=-1, sy=-1):
+    """
+    Класс, представляющий птицу в игре.
+
+    Атрибуты:
+        speed (int): Скорость движения птицы по горизонтали.
+        imgs (List[pygame.Surface]): Список изображений для анимации движения птицы.
+        rect (pygame.Rect): Прямоугольник, ограничивающий изображение птицы.
+        birds_height (List[int]): Список возможных высот, на которых может появиться птица.
+        index (int): Индекс текущего изображения в анимации.
+        counter (int): Счетчик кадров для анимации.
+        movement (List[int]): Список с компонентами движения птицы.
+    """
+    def __init__(self, speed: int = 5, sx: int = -1, sy: int = -1):
+        """
+        Инициализация объекта птицы.
+
+        Аргументы:
+            speed (int, опционально): Скорость движения птицы по горизонтали. По умолчанию 5.
+            sx (int, опционально): Желаемая ширина спрайта птицы. По умолчанию -1, что означает без изменения размера.
+            sy (int, опционально): Желаемая высота спрайта птицы. По умолчанию -1, что означает без изменения размера.
+        """
         pygame.sprite.Sprite.__init__(self, self.containers)
         self.imgs, self.rect = load_sprite_sheet('birds.png', 2, 1, sx, sy, -1)
         self.birds_height = [height_screen * 0.82, height_screen * 0.75, height_screen * 0.60]
@@ -203,9 +330,11 @@ class birds(pygame.sprite.Sprite):
         self.counter = 0
 
     def draw(self):
+        """Отображает изображение птицы на экране."""
         screen_layout_display.blit(self.image, self.rect)
 
     def update(self):
+        """Обновляет состояние птицы."""
         if self.counter % 10 == 0:
             self.index = (self.index + 1) % 2
         self.image = self.imgs[self.index]
@@ -216,7 +345,23 @@ class birds(pygame.sprite.Sprite):
 
 
 class Ground():
-    def __init__(self, speed=-5):
+    """
+    Класс, представляющий землю в игре.
+
+    Атрибуты:
+        speed (int): Скорость движения земли по горизонтали.
+        image (pygame.Surface): Изображение земли для первого блока.
+        rect (pygame.Rect): Прямоугольник, ограничивающий первый блок изображения земли.
+        image1 (pygame.Surface): Изображение земли для второго блока.
+        rect1 (pygame.Rect): Прямоугольник, ограничивающий второй блок изображения земли.
+    """
+    def __init__(self, speed: int = -5):
+        """
+        Инициализация объекта земли.
+
+        Аргументы:
+            speed (int, опционально): Скорость движения земли по горизонтали. По умолчанию -5.
+        """
         self.image, self.rect = load_image('ground.png', -1, -1, -1)
         self.image1, self.rect1 = load_image('ground.png', -1, -1, -1)
         self.rect.bottom = height_screen
@@ -225,10 +370,12 @@ class Ground():
         self.speed = speed
 
     def draw(self):
+        """Отображает изображения земли на экране."""
         screen_layout_display.blit(self.image, self.rect)
         screen_layout_display.blit(self.image1, self.rect1)
 
     def update(self):
+        """Обновляет состояние земли."""
         self.rect.left += self.speed
         self.rect1.left += self.speed
 
@@ -238,13 +385,24 @@ class Ground():
         if self.rect1.right < 0:
             self.rect1.left = self.rect.right
 
-
-
-
-
-
 class Cloud(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    """
+    Класс, представляющий облако в игре.
+
+    Атрибуты:
+        speed (int): Скорость движения облака по горизонтали.
+        image (pygame.Surface): Изображение облака.
+        rect (pygame.Rect): Прямоугольник, ограничивающий изображение облака.
+        movement (List[int]): Список с компонентами движения облака.
+    """
+    def __init__(self, x: int, y: int):
+        """
+        Инициализация объекта облака.
+
+        Аргументы:
+            x (int): Координата X для размещения облака на экране.
+            y (int): Координата Y для размещения облака на экране.
+        """
         pygame.sprite.Sprite.__init__(self, self.containers)
         self.image, self.rect = load_image('cloud.png', int(90 * 30 / 42), 30, -1)
         self.speed = 1
@@ -253,16 +411,35 @@ class Cloud(pygame.sprite.Sprite):
         self.movement = [-1 * self.speed, 0]
 
     def draw(self):
+        """Отображает изображение облака на экране."""
         screen_layout_display.blit(self.image, self.rect)
 
     def update(self):
+        """Обновляет состояние облака."""
         self.rect = self.rect.move(self.movement)
         if self.rect.right < 0:
             self.kill()
 
 
 class Scoreboard():
-    def __init__(self, x=-1, y=-1):
+    """
+    Класс, представляющий табло счета игрока.
+
+    Атрибуты:
+        score (int): Текущий счет игрока.
+        scre_img (List[pygame.Surface]): Список изображений для отображения цифр счета.
+        screrect (pygame.Rect): Прямоугольник, ограничивающий одну изображение цифры счета.
+        image (pygame.Surface): Поверхность для отображения табло счета.
+        rect (pygame.Rect): Прямоугольник, ограничивающий изображение табло счета.
+    """
+    def __init__(self, x: int = -1, y: int = -1):
+        """
+        Инициализация объекта табло счета.
+
+        Аргументы:
+            x (int, опционально): Координата X для размещения табло счета на экране. По умолчанию -1.
+            y (int, опционально): Координата Y для размещения табло счета на экране. По умолчанию -1.
+        """
         self.score = 0
         self.scre_img, self.screrect = load_sprite_sheet('numbers.png', 12, 1, 11, int(11 * 6 / 5), -1)
         self.image = pygame.Surface((55, int(11 * 6 / 5)))
@@ -277,9 +454,16 @@ class Scoreboard():
             self.rect.top = y
 
     def draw(self):
+        """Отображает табло счета на экране."""
         screen_layout_display.blit(self.image, self.rect)
 
-    def update(self, score):
+    def update(self, score: int):
+        """
+        Обновляет табло счета.
+
+        Аргументы:
+            score (int): Новое значение счета игрока.
+        """
         score_digits = extractDigits(score)
         self.image.fill(bg_color)
         for s in score_digits:
